@@ -2,8 +2,34 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <array>
 
-int optimal(std::vector<int> &P, int step, int state);
+int optimal(std::vector<int> &P, std::vector<std::array<int, 2>> &M, int step, int state)
+{
+    if (step < 0)
+    {
+        return 0; // start point
+    }
+
+    int &record = M[step][state - 1];
+    if (record != -1)
+    {
+        return record;
+    }
+
+    if (state == 1)
+    {
+        // P[step] + max( f(step-2, 1), f(step-2, 2))
+        record = P[step] + std::max({optimal(P, M, step - 2, 1), optimal(P, M, step - 2, 2)});
+    }
+    else
+    // if (state == 2)
+    {
+        // P[step] + f(step-1, 1)
+        record = P[step] + optimal(P, M, step - 1, 1);
+    }
+    return record;
+}
 
 int main()
 {
@@ -41,26 +67,10 @@ int main()
     f2(0) = P[0] + f1(-1)
     */
 
-    std::cout << std::max({optimal(P, N - 1, 1), optimal(P, N - 1, 2)}) << '\n';
+    auto M = std::vector<std::array<int, 2>>(N, {-1, -1}); // record optimal points
+    // f1(x): M[x][0]
+    // f2(x): M[x][1]
+
+    std::cout << std::max({optimal(P, M, N - 1, 1), optimal(P, M, N - 1, 2)}) << '\n';
     return 0;
-}
-
-int optimal(std::vector<int> &P, int step, int state)
-{
-    if (step < 0)
-    {
-        return 0; // start point
-    }
-
-    if (state == 1)
-    {
-        // P[step] + max( f(step-2, 1), f(step-2, 2))
-        return P[step] + std::max({optimal(P, step - 2, 1), optimal(P, step - 2, 2)});
-    }
-    else
-    // if (state == 2)
-    {
-        // P[step] + f(step-1, 1)
-        return P[step] + optimal(P, step - 1, 1);
-    }
 }
